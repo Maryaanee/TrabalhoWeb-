@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Novo Evento</title>
+</head>
+<body>
+
+<h1>Cadastrar Evento</h1>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Evento:</label><br>
+    <input type="text" name="evento"><br><br>
+
+    <label>Local:</label><br>
+    <input type="text" name="local"><br><br>
+
+    <button type="submit">Salvar</button>
+</form>
+
+<a href="{% url 'home' %}">Voltar</a>
+
+</body>
+</html>

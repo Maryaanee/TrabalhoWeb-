@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Eventos Corporativos</title>
+</head>
+<body>
+
+<h1>Eventos em destaque</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Evento</th>
+            <th>Local</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Eventos fixos -->
+        <tr>
+            <td>Seminário de Estatística</td>
+            <td>Laboratório 01</td>
+        </tr>
+        <tr>
+            <td>Semana da TI</td>
+            <td>Auditório</td>
+        </tr>
+
+        <!-- Eventos cadastrados -->
+        {% for item in eventos %}
+        <tr>
+            <td>{{ item.evento }}</td>
+            <td>{{ item.local }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'novo' %}">➕ Novo Evento</a>
+
+</body>
+</html>
