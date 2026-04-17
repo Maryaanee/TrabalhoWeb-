@@ -64,3 +64,106 @@ class ContatoForm(forms.Form):
 | Criar Admin | python manage.py createsuperuser |
 Qual desses tópicos você gostaria de aprofundar primeiro criando um exemplo prático de código?
 
+
+Como a atividade pede **persistência em uma lista global** (em memória) e o uso de **Django Forms**, não precisaremos configurar um banco de dados (models.py) agora. Vamos focar na lógica de visualização e no formulário.
+Aqui está o passo a passo para o seu VS Code:
+### 1. Criar o Formulário (forms.py)
+Crie este arquivo dentro da pasta do seu app para definir os campos solicitados na imagem (Evento e Local).
+```python
+from django import forms
+
+class EventoForm(forms.Form):
+    nome_evento = forms.CharField(label="Evento", max_length=100)
+    local_evento = forms.CharField(label="Local", max_length=100)
+
+```
+### 2. A Lógica com Lista Global (views.py)
+Aqui vamos criar a lista no topo do arquivo para salvar os dados temporariamente, conforme a instrução técnica da prova.
+```python
+from django.shortcuts import render, redirect
+from .forms import EventoForm
+
+# Lista global para persistência em memória
+eventos_db = [
+    {'evento': 'Seminário de estatística', 'local': 'Laboratório 01'},
+    {'evento': 'Semana da TI', 'local': 'Auditório'},
+]
+
+def home(request):
+    # Lista os eventos ativos na Dashboard
+    return render(request, 'home.html', {'eventos': eventos_db})
+
+def novo_evento(request):
+    if request.method == 'POST':
+        form = EventoForm(request.POST)
+        if form.is_valid():
+            # Extrai os dados e adiciona na lista global
+            novo = {
+                'evento': form.cleaned_data['nome_evento'],
+                'local': form.cleaned_data['local_evento']
+            }
+            eventos_db.append(novo)
+            return redirect('home') # Volta para a lista após cadastrar
+    else:
+        form = EventoForm()
+    
+    return render(request, 'novo.html', {'form': form})
+
+```
+### 3. Criando os Templates (HTML)
+#### home.html (A Dashboard)
+Use a **DTL (Django Template Language)** para criar a tabela.
+```html
+<h2>Eventos em Destaque</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Evento</th>
+            <th>Local</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in eventos %}
+        <tr>
+            <td>{{ e.evento }}</td>
+            <td>{{ e.local }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br>
+<a href="{% url 'novo' %}">Cadastrar Novo Registro</a>
+
+```
+#### novo.html (O Formulário de Registro)
+Aqui usamos o {% csrf_token %} por segurança e o {{ form.as_p }} para renderizar os campos.
+```html
+<h2>Novo Registro</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Confirmar Cadastro</button>
+</form>
+<br>
+<a href="{% url 'home' %}">Cancelar e Voltar</a>
+
+```
+### 4. Configurar os Caminhos (urls.py)
+No arquivo urls.py do seu app, conecte as páginas:
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('novo/', views.novo_evento, name='novo'),
+]
+
+```
+### Resumo do que foi aplicado:
+ 1. **Django Templates:** Usamos {% for %} para listar os eventos.
+ 2. **Django Forms:** Criamos a classe EventoForm para validar a entrada.
+ 3. **MVT:** A View faz a ponte entre a lista (Model improvisado) e o HTML.
+ 4. **Persistência:** A variável eventos_db guarda os nomes enquanto o servidor estiver rodando.
+**Dica para a entrega:** Como a prova pede o repositório no GitHub, certifique-se de que o arquivo .gitignore ignore a pasta venv e que você tenha feito o pip freeze > requirements.txt antes de subir o código!
+
